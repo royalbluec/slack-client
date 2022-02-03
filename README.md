@@ -1,1 +1,3 @@
 "# slack" 
+
+npm run build
