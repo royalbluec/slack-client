@@ -76,24 +76,9 @@ const config: webpack.Configuration = {
     devMiddleware: { publicPath: '/dist' },
     static: { directory: path.resolve(__dirname) },
     hot: true,
-    port: 3090
-  }
-  // devServer: {
-  //   devMiddleware: { publicPath: '/dist' },
-  //   static: { directory: path.resolve(__dirname) },
-  //   hot: true
-  // }
-  // devServer: {
-  //   historyApiFallback: true, // react router
-  //   port: 3090,
-    // publicPath: '/dist/',
-    // proxy: {
-    //   '/api/': {
-    //     target: 'http://localhost:3095',
-    //     changeOrigin: true,
-    //   },
-    // },
-  // },
+    port: 3090,
+    historyApiFallback: true,
+  },
 };
 
 if (isDevelopment && config.plugins) {
