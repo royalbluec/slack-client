@@ -1,7 +1,9 @@
-import useInput from '@hooks/useInput';
 import React, { useCallback, useState } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 import { Success, Form, Error, Label, Input, LinkContainer, Button, Header } from './styles';
+
+import useInput from '@hooks/useInput';
 
 const SignIn = () => {
   const [email, onChangeEmail] = useInput('');
@@ -15,17 +17,18 @@ const SignIn = () => {
   const onChangePassword = useCallback(
     (e) => {
       setPassword(e.target.value);
-      // setMismatchError(e.target.value !== passwordCheck);
-      setMismatchError(passwordCheck !== e.target.value);
+      setMismatchError(e.target.value !== passwordCheck);
     },
     [passwordCheck],
   );
 
-  const onChangePasswordCheck = useCallback((e) => {
-    setPasswordCheck(e.target.value);
-    // setMismatchError(e.target.value !== password);
-    setMismatchError(password !== e.target.value);
-  }, []);
+  const onChangePasswordCheck = useCallback(
+    (e) => {
+      setPasswordCheck(e.target.value);
+      setMismatchError(e.target.value !== password);
+    },
+    [password],
+  );
 
   const onSubmit = useCallback(
     (e) => {
@@ -97,7 +100,7 @@ const SignIn = () => {
       </Form>
       <LinkContainer>
         이미 회원이신가요?&nbsp;
-        <a href="/login">로그인 하러가기</a>
+        <Link to="/login">로그인 하러가기</Link>
       </LinkContainer>
     </div>
   );
