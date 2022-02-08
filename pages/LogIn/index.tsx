@@ -1,14 +1,14 @@
 import React, { useCallback, useState } from 'react';
 import axios from 'axios';
 import useSWR from 'swr';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { Button, Error, Form, Header, Input, Label, LinkContainer } from '@pages/SignUp/styles';
 
 import useInput from '@hooks/useInput';
 import fetcher from '@utils/fetcher';
 
 const LogIn = () => {
-  const { data, error } = useSWR('http://localhost:3095/api/users', fetcher);
+  const { data, error, mutate } = useSWR('http://localhost:3095/api/users', fetcher);
   const [logInError, setLogInError] = useState(false);
   const [email, onChangeEmail] = useInput('');
   const [password, onChangePassword] = useInput('');
@@ -24,13 +24,23 @@ const LogIn = () => {
             withCredentials: true,
           },
         )
-        .then(() => {})
+        .then((response) => {
+          mutate(response.data, false);
+        })
         .catch((error) => {
           setLogInError(error.response?.data?.code === 401);
         });
     },
     [email, password],
   );
+
+  if (data === undefined) {
+    return <div>로딩중...</div>;
+  }
+
+  if (data) {
+    return <Navigate replace to="/workspace/channel" />;
+  }
 
   return (
     <div id="container">

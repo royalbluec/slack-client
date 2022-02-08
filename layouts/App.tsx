@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Navigate, Routes, Route } from 'react-router-d
 
 const LogIn = loadable(() => import('@pages/LogIn'));
 const SignUp = loadable(() => import('@pages/SignUp'));
+const Channel = loadable(() => import('@pages/Channel'));
 
 const App = () => {
   return (
@@ -12,6 +13,7 @@ const App = () => {
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<LogIn />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="/workspace/channel" element={<Channel />} />
       </Routes>
     </Router>
   );
