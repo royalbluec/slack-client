@@ -2,7 +2,8 @@ import React, { FC, useCallback } from 'react';
 import axios from 'axios';
 import useSWR from 'swr';
 import gravatar from 'gravatar';
-import { Navigate } from 'react-router';
+import loadable from '@loadable/component';
+import { Navigate, Route, Routes } from 'react-router';
 import {
   Header,
   RightMenu,
@@ -16,6 +17,9 @@ import {
 } from '@layouts/Workspace/styles';
 
 import fetcher from '@utils/fetcher';
+
+const Channel = loadable(() => import('@pages/Channel'));
+const DirectMessage = loadable(() => import('@pages/DirectMessage'));
 
 const Workspace: FC = ({ children }) => {
   const { data, error, mutate } = useSWR('http://localhost:3095/api/users', fetcher);
@@ -49,7 +53,12 @@ const Workspace: FC = ({ children }) => {
           <WorkspaceName>Slack</WorkspaceName>
           <MenuScroll>menu scroll</MenuScroll>
         </Channels>
-        <Chats>Chats</Chats>
+        <Chats>
+          <Routes>
+            <Route path="/channel" element={<Channel />} />
+            <Route path="/dm" element={<DirectMessage />} />
+          </Routes>
+        </Chats>
       </WorkspaceWrapper>
     </div>
   );
