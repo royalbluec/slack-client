@@ -30,6 +30,7 @@ import CreateChannelModal from '@components/CreateChannelModal';
 import InviteWorkspaceModal from '@components/InviteWorkspaceModal';
 import InviteChannelModal from '@components/InviteChannelModal';
 import DMList from '@components/DMList';
+import ChannelList from '@components/ChannelList';
 import useInput from '@hooks/useInput';
 import fetcher from '@utils/fetcher';
 import { IChannel, IUser } from '@typings/db';
@@ -177,7 +178,7 @@ const Workspace: VFC = () => {
                 <button onClick={onLogout}>로그아웃</button>
               </WorkspaceModal>
             </Menu>
-            {/* <ChannelList /> */}
+            <ChannelList />
             <DMList />
           </MenuScroll>
         </Channels>
