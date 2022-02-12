@@ -3,6 +3,7 @@ import axios from 'axios';
 import useSWR from 'swr';
 import gravatar from 'gravatar';
 import loadable from '@loadable/component';
+import { useParams } from 'react-router';
 import { Navigate, Route, Routes, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import {
@@ -28,7 +29,7 @@ import Modal from '@components/Modal';
 import CreateChannelModal from '@components/CreateChannelModal';
 import useInput from '@hooks/useInput';
 import fetcher from '@utils/fetcher';
-import { IUser } from '@typings/db';
+import { IChannel, IUser } from '@typings/db';
 
 const Channel = loadable(() => import('@pages/Channel'));
 const DirectMessage = loadable(() => import('@pages/DirectMessage'));
@@ -41,7 +42,12 @@ const Workspace: VFC = () => {
   const [newWorkspace, onChangeNewWorkspace, setNewWorkspace] = useInput('');
   const [newUrl, onChangeNewUrl, setNewUrl] = useInput('');
 
+  const { workspace } = useParams<{ workspace: string }>();
   const { data: userData, error, mutate } = useSWR<IUser | false>('http://localhost:3095/api/users', fetcher);
+  const { data: channelData } = useSWR<IChannel[]>(
+    userData ? `http://localhost:3095/api/workspaces/${workspace}/channels` : null,
+    fetcher,
+  );
 
   const onLogout = useCallback(() => {
     axios
@@ -155,29 +161,36 @@ const Workspace: VFC = () => {
                 <button onClick={onLogout}>로그아웃</button>
               </WorkspaceModal>
             </Menu>
+            {channelData?.map((v) => (
+              <div>{v.name}</div>
+            ))}
           </MenuScroll>
         </Channels>
         <Chats>
           <Routes>
-            <Route path="/channel" element={<Channel />} />
-            <Route path="/dm" element={<DirectMessage />} />
+            <Route path="/:workspace/channel/:channel" element={<Channel />} />
+            <Route path="/:workspace/dm/:id" element={<DirectMessage />} />
           </Routes>
         </Chats>
       </WorkspaceWrapper>
       <Modal show={showCreateWorkspaceModal} onCloseModal={onCloseModal}>
         <form onSubmit={onCreateWorkspace}>
-          <Label id="worksapce-label">
+          <Label>
             <span>워크스페이스 이름</span>
-            <Input id="workspace" value={newWorkspace} onChange={onChangeNewWorkspace} />
+            <Input value={newWorkspace} onChange={onChangeNewWorkspace} />
           </Label>
-          <Label id="worksapce-url-label">
-            <span>워크스페이스 url</span>
-            <Input id="workspace" value={newUrl} onChange={onChangeNewUrl} />
+          <Label id="workspace-url-label">
+            {/* <span>워크스페이스 url</span> */}
+            <Input value={newUrl} onChange={onChangeNewUrl} />
           </Label>
           <Button type="submit">생성하기</Button>
         </form>
       </Modal>
-      <CreateChannelModal show={showCreateChannelModal} onCloseModal={onCloseModal} />
+      <CreateChannelModal
+        show={showCreateChannelModal}
+        onCloseModal={onCloseModal}
+        setShowCreateChannelModal={setShowCreateChannelModal}
+      />
     </div>
   );
 };
