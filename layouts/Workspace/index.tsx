@@ -29,6 +29,7 @@ import Modal from '@components/Modal';
 import CreateChannelModal from '@components/CreateChannelModal';
 import InviteWorkspaceModal from '@components/InviteWorkspaceModal';
 import InviteChannelModal from '@components/InviteChannelModal';
+import DMList from '@components/DMList';
 import useInput from '@hooks/useInput';
 import fetcher from '@utils/fetcher';
 import { IChannel, IUser } from '@typings/db';
@@ -50,6 +51,10 @@ const Workspace: VFC = () => {
   const { data: userData, error, mutate } = useSWR<IUser | false>('http://localhost:3095/api/users', fetcher);
   const { data: channelData } = useSWR<IChannel[]>(
     userData ? `http://localhost:3095/api/workspaces/${workspace}/channels` : null,
+    fetcher,
+  );
+  const { data: memberData } = useSWR<IChannel[]>(
+    userData ? `http://localhost:3095/api/workspaces/${workspace}/members` : null,
     fetcher,
   );
 
@@ -172,9 +177,8 @@ const Workspace: VFC = () => {
                 <button onClick={onLogout}>로그아웃</button>
               </WorkspaceModal>
             </Menu>
-            {channelData?.map((v) => (
-              <div key={v.id}>{v.name}</div>
-            ))}
+            {/* <ChannelList /> */}
+            <DMList />
           </MenuScroll>
         </Channels>
         <Chats>
