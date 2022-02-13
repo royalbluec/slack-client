@@ -39,8 +39,8 @@ const DirectMessage = () => {
               withCredentials: true,
             },
           )
-          .then((response) => {
-            mutateChat(response.data, false);
+          .then(() => {
+            mutateChat();
             setChat('');
           })
           .catch(console.error);
