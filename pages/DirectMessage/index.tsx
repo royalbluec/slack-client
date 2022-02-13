@@ -11,15 +11,17 @@ import useInput from '@hooks/useInput';
 import fetcher from '@utils/fetcher';
 import { IDM } from '@typings/db';
 
+const backUrl = 'http://localhost:3095';
+
 const DirectMessage = () => {
   const [chat, onChangeChat, setChat] = useInput('');
 
   const { workspace, id } = useParams<{ workspace: string; id: string }>();
 
-  const { data: userData } = useSWR(`http://localhost:3095/api/workspaces/${workspace}/users/${id}`, fetcher);
-  const { data: myData } = useSWR(`http://localhost:3095/api/users`, fetcher);
+  const { data: userData } = useSWR(`${backUrl}/api/workspaces/${workspace}/users/${id}`, fetcher);
+  const { data: myData } = useSWR(`${backUrl}/api/users`, fetcher);
   const { data: chatData, mutate: mutateChat } = useSWR<IDM[]>(
-    `http://localhost:3095/api/workspaces/${workspace}/dms/${id}/chat?perPage=20&page=1`,
+    `${backUrl}/api/workspaces/${workspace}/dms/${id}/chats?perPage=20&page=1`,
     fetcher,
   );
 
@@ -29,7 +31,7 @@ const DirectMessage = () => {
       if (chat?.trim()) {
         axios
           .post(
-            `http://localhost:3095/api/workspaces/${workspace}/dms/${id}/chats`,
+            `${backUrl}/api/workspaces/${workspace}/dms/${id}/chats`,
             {
               content: chat,
             },
@@ -57,7 +59,7 @@ const DirectMessage = () => {
         <img src={gravatar.url(userData.email, { s: '24px', d: 'retro' })} alt={userData.nickname} />
         <span>{userData.nickname}</span>
       </Header>
-      <ChatList />
+      <ChatList chatData={chatData} />
       <ChatBox chat={chat} onChangeChat={onChangeChat} onSubmitForm={onSubmitForm} />
     </Container>
   );
