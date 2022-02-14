@@ -1,6 +1,12 @@
 import React, { useCallback, useEffect, useRef, VFC } from 'react';
 import autosize from 'autosize';
-import { ChatArea, Form, MentionsTextarea, SendButton, Toolbox } from '@components/ChatBox/styles';
+import { Mention, SuggestionDataItem } from 'react-mentions';
+import { ChatArea, EachMention, Form, MentionsTextarea, SendButton, Toolbox } from '@components/ChatBox/styles';
+import useSWR from 'swr';
+import gravatar from 'gravatar';
+import { IChannel, IUser } from '@typings/db';
+import fetcher from '@utils/fetcher';
+import { useParams } from 'react-router-dom';
 
 interface Props {
   chat: string;
@@ -9,8 +15,17 @@ interface Props {
   placeholder?: string;
 }
 
+const backUrl = 'http://localhost:3095';
+
 const ChatBox: VFC<Props> = ({ chat, onSubmitForm, onChangeChat, placeholder }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const { workspace } = useParams<{ workspace: string }>();
+  const { data: userData, error, mutate } = useSWR<IUser | false>(`${backUrl}/api/users`, fetcher);
+  const { data: memberData } = useSWR<IUser[]>(
+    userData ? `${backUrl}/api/workspaces/${workspace}/members` : null,
+    fetcher,
+  );
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -30,6 +45,28 @@ const ChatBox: VFC<Props> = ({ chat, onSubmitForm, onChangeChat, placeholder }) 
     [onSubmitForm],
   );
 
+  const renderSuggestion = useCallback(
+    (
+      suggestion: SuggestionDataItem,
+      search: string,
+      highlightedDisplay: React.ReactNode,
+      index: number,
+      focus: boolean,
+    ): React.ReactNode => {
+      if (!memberData) return;
+      return (
+        <EachMention focus={focus}>
+          <img
+            src={gravatar.url(memberData[index].email, { s: '20px', d: 'retro' })}
+            alt={memberData[index].nickname}
+          />
+          <span>{highlightedDisplay}</span>
+        </EachMention>
+      );
+    },
+    [memberData],
+  );
+
   return (
     <ChatArea>
       <Form onSubmit={onSubmitForm}>
@@ -39,8 +76,16 @@ const ChatBox: VFC<Props> = ({ chat, onSubmitForm, onChangeChat, placeholder }) 
           onChange={onChangeChat}
           onKeyDown={onKeydownChat}
           placeholder={placeholder}
-          ref={textareaRef}
-        />
+          inputRef={textareaRef}
+          allowSuggestionsAboveCursor
+        >
+          <Mention
+            appendSpaceOnAdd
+            trigger="@"
+            data={memberData?.map((v) => ({ id: v.id, display: v.nickname })) || []}
+            renderSuggestion={renderSuggestion}
+          />
+        </MentionsTextarea>
         <Toolbox>
           <SendButton
             className={
