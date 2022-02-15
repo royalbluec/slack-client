@@ -10,6 +10,7 @@ import ChatList from '@components/ChatList';
 import useInput from '@hooks/useInput';
 import fetcher from '@utils/fetcher';
 import { IDM } from '@typings/db';
+import makeSection from '@utils/makSection';
 
 const backUrl = 'http://localhost:3095';
 
@@ -53,13 +54,15 @@ const DirectMessage = () => {
     return null;
   }
 
+  const chatSections = makeSection(chatData ? [...chatData].reverse() : []);
+
   return (
     <Container>
       <Header>
         <img src={gravatar.url(userData.email, { s: '24px', d: 'retro' })} alt={userData.nickname} />
         <span>{userData.nickname}</span>
       </Header>
-      <ChatList chatData={chatData} />
+      <ChatList chatSections={chatSections} />
       <ChatBox chat={chat} onChangeChat={onChangeChat} onSubmitForm={onSubmitForm} />
     </Container>
   );
