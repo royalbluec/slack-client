@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import useSWR from 'swr';
 import useSWRInfinite from 'swr/infinite';
 import axios from 'axios';
@@ -40,7 +40,24 @@ const DirectMessage = () => {
   const onSubmitForm = useCallback(
     (e) => {
       e.preventDefault();
-      if (chat?.trim()) {
+      console.log(chat);
+      if (chat?.trim() && chatData) {
+        mutateChat((prevChatData) => {
+          const savedChat = chat;
+          prevChatData?.[0].unshift({
+            id: (chatData[0][0]?.id || 0) + 1,
+            content: savedChat,
+            SenderId: myData.id,
+            Sender: myData,
+            ReceiverId: userData.id,
+            Receiver: userData,
+            createdAt: new Date(),
+          });
+          return prevChatData;
+        }, false).then(() => {
+          setChat('');
+          scrollbarRef.current?.scrollToBottom();
+        });
         axios
           .post(
             `${backUrl}/api/workspaces/${workspace}/dms/${id}/chats`,
@@ -53,13 +70,19 @@ const DirectMessage = () => {
           )
           .then(() => {
             mutateChat();
-            setChat('');
           })
           .catch(console.error);
       }
     },
-    [chat],
+    [chat, chatData, myData, userData, workspace, id],
   );
+
+  // 로딩 시 스크롤바 제일 아래로
+  useEffect(() => {
+    if (chatData?.length === 1) {
+      scrollbarRef.current?.scrollToBottom();
+    }
+  });
 
   if (!userData || !myData) {
     return null;
@@ -75,9 +98,8 @@ const DirectMessage = () => {
       </Header>
       <ChatList
         chatSections={chatSections}
-        ref={scrollbarRef}
+        scrollbarRef={scrollbarRef}
         setSize={setSize}
-        isEmpty={isEmpty}
         isReachingEnd={isReachingEnd}
       />
       <ChatBox chat={chat} onChangeChat={onChangeChat} onSubmitForm={onSubmitForm} />
